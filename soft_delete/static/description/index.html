@@ -76,7 +76,7 @@
             align-items: center;
         }
         .screenshot-item {
-            background-color: #fff;
+            background-color: #ff0000;
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -152,6 +152,17 @@
             max-width: 900px;
             margin: 0 auto;
         }
+        .section.license pre {
+            white-space: pre-wrap;
+            text-align: left;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px auto;
+            max-width: 700px;
+            font-family: 'Courier New', Courier, monospace;
+        }
         @media (max-width: 768px) {
             h1 {
                 font-size: 2em;
@@ -172,6 +183,10 @@
                 max-width: 50%;
             }
             .code-snippet {
+                font-size: 0.8em;
+                padding: 10px;
+            }
+            .section.license pre {
                 font-size: 0.8em;
                 padding: 10px;
             }
@@ -213,70 +228,101 @@
         </div>
 
         <!-- Screenshots -->
-        <div class="section screenshots">
+        <div class="section screenshots" style="background-color: #ffffff; padding: 15px 15px 15px 15px;">
             <h2>Screenshots</h2>
 
-            <div class="screenshot-item">
+            <div class="screenshot-item" style="padding: 15px 30px; background-color: #c5bfbf; border-radius: 10px;">
                 <h3>Find Model Name</h3>
                 <p>Locate the model name in the Odoo interface to configure soft delete settings.</p>
                 <img src="1model_name_find.png" alt="Find Model Name" style="max-width: 100%; height: auto;" >
+                <br/>
             </div>
 
-            <div class="screenshot-item">
+            <br/>
+            <br/>
+
+            <div class="screenshot-item" style="padding: 15px 30px; background-color: #c5bfbf; border-radius: 10px;">
                 <h3>Copy and Paste Model Name</h3>
                 <p>Copy the model name and paste it into the Soft Delete Manager settings to enable soft delete.</p>
                 <img src="2model_name_copy_past.png" alt="Copy and Paste Model Name" style="max-width: 100%; height: auto;" >
             </div>
 
-            <div class="screenshot-item">
+            <br/>
+            <br/>
+
+            <div class="screenshot-item" style="padding: 15px 30px; background-color: #c5bfbf; border-radius: 10px;">
                 <h3>Restricted Access for Normal Users</h3>
                 <p>Normal users cannot access the soft delete functionality, ensuring secure operations.</p>
                 <img src="3normal_user_not_access_this_button.png" alt="Restricted Access for Normal Users" style="max-width: 100%; height: auto;" >
             </div>
 
-            <div class="screenshot-item">
+            <br/>
+            <br/>
+
+            <div class="screenshot-item" style="padding: 15px 30px; background-color: #c5bfbf; border-radius: 10px;">
                 <h3>Switch to Superuser Mode</h3>
                 <p>Administrators can switch to superuser mode to access advanced soft delete features.</p>
                 <img src="4become_superuser.png" alt="Switch to Superuser Mode" style="max-width: 100%; height: auto;" >
             </div>
 
-            <div class="screenshot-item">
+            <br/>
+            <br/>
+
+            <div class="screenshot-item" style="padding: 15px 30px; background-color: #c5bfbf; border-radius: 10px;">
                 <h3>Deleted Records Tree View</h3>
                 <p>View soft-deleted records in a dedicated tree view for easy management.</p>
                 <img src="5deleted_records_tree_view.png" alt="Deleted Records Tree View" style="max-width: 100%; height: auto;" >
             </div>
 
-            <div class="screenshot-item">
+            <br/>
+            <br/>
+
+            <div class="screenshot-item" style="padding: 15px 30px; background-color: #c5bfbf; border-radius: 10px;">
                 <h3>Record Deletion</h3>
                 <p>Soft delete a record, marking it as deleted without removing it permanently.</p>
                 <img src="6record_delete.png" alt="Record Deletion" style="max-width: 100%; height: auto;" >
             </div>
 
-            <div class="screenshot-item">
+            <br/>
+            <br/>
+
+            <div class="screenshot-item" style="padding: 15px 30px; background-color: #c5bfbf; border-radius: 10px;">
                 <h3>View Deleted Records</h3>
                 <p>Soft-deleted records are displayed in a dedicated tree view for review.</p>
                 <img src="7deleted_records_show_in_this_tree_view.png" alt="View Deleted Records" style="max-width: 100%; height: auto;" >
             </div>
 
-            <div class="screenshot-item">
+            <br/>
+            <br/>
+
+            <div class="screenshot-item" style="padding: 15px 30px; background-color: #c5bfbf; border-radius: 10px;">
                 <h3>Restore and Permanent Delete Buttons</h3>
                 <p>Access buttons to restore or permanently delete soft-deleted records in the wizard.</p>
                 <img src="8restore_and_permanent_delete_buttnes.png" alt="Restore and Permanent Delete Buttons" style="max-width: 100%; height: auto;" >
             </div>
 
-            <div class="screenshot-item">
+            <br/>
+            <br/>
+
+            <div class="screenshot-item" style="padding: 15px 30px; background-color: #c5bfbf; border-radius: 10px;">
                 <h3>Restore Button</h3>
                 <p>Use the restore button to recover soft-deleted records back to their original state.</p>
                 <img src="9restore_button.png" alt="Restore Button" style="max-width: 100%; height: auto;" >
             </div>
 
-            <div class="screenshot-item">
+            <br/>
+            <br/>
+
+            <div class="screenshot-item" style="padding: 15px 30px; background-color: #c5bfbf; border-radius: 10px;">
                 <h3>Restored Records in Main Screen</h3>
                 <p>Restored records reappear in the main screen, fully recovered.</p>
                 <img src="10restore_records_in_main_screen.png" alt="Restored Records in Main Screen" style="max-width: 100%; height: auto;" >
             </div>
 
-            <div class="screenshot-item">
+            <br/>
+            <br/>
+
+            <div class="screenshot-item" style="padding: 15px 30px; background-color: #c5bfbf; border-radius: 10px;">
                 <h3>Permanent Delete Button</h3>
                 <p>Permanently delete soft-deleted records using the dedicated button.</p>
                 <img src="11permanent_delete_button.png" alt="Permanent Delete Button" style="max-width: 100%; height: auto;" >
@@ -321,6 +367,10 @@
         <!-- License -->
         <div class="section license">
             <h2>License</h2>
+            <p>
+                View the full license details for the Binary Media Capture Widget module.
+                <a href="https://www.odoo.com/documentation/16.0/legal/licenses.html" target="_blank" class="support">View License in New Tab</a>
+            </p>
             <pre>
                 Odoo Proprietary License v1.0
 
@@ -350,6 +400,8 @@
                 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
                 DEALINGS IN THE SOFTWARE.
             </pre>
+        </div>
+
         </div>
     </div>
 </body>
