@@ -21,8 +21,8 @@
     ],
     'assets': {
         'web.assets_backend': [
-            "soft_delete_manager/static/src/js/soft_delete_tree_view_header_button.js",
-            "soft_delete_manager/static/src/xml/soft_delete_tree_view_header_button.xml",
+            "soft_delete/static/src/js/soft_delete_tree_view_header_button.js",
+            "soft_delete/static/src/xml/soft_delete_tree_view_header_button.xml",
         ],
     },
     'installable': True,
