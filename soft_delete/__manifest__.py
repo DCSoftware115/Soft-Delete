@@ -12,7 +12,7 @@
     ''',
     'category': 'Tools',
     'author': 'Daksh',
-    'website': 'https://github.com/daksh00008',
+    'website': 'https://github.com',
     'license': 'OPL-1',
     'depends': ['base', 'web'],
     'data': [
