@@ -38,12 +38,19 @@ class SoftDeleteConfigSettings(models.TransientModel):
         IrModelData = self.env['ir.model.data']
         IrActionsServer = self.env['ir.actions.server']
 
-        # Remove outdated inherited views
-        existing_views = IrUiView.search([
+        # Remove outdated inherited tree views
+        existing_tree_views = IrUiView.search([
             ('inherit_id.model', 'in', [m.model for m in IrModel.search([])]),
             ('name', '=', 'soft_delete_manager.tree.view.inherit.dynamic')
         ])
-        existing_views.unlink()
+        existing_tree_views.unlink()
+
+        # Remove outdated inherited Kanban views
+        existing_kanban_views = IrUiView.search([
+            ('inherit_id.model', 'in', [m.model for m in IrModel.search([])]),
+            ('name', '=', 'soft_delete_manager.kanban.view.inherit.dynamic')
+        ])
+        existing_kanban_views.unlink()
 
         # Process each model
         for model in IrModel.browse(new_model_ids):
@@ -93,6 +100,37 @@ class SoftDeleteConfigSettings(models.TransientModel):
                 _logger.info(f"Added js_class to tree view of model {model.model} (inherit_id: {tree_view.id}, external ref: {inherit_id_ref}, new js_class: {new_js_class})")
             else:
                 _logger.warning(f"No primary tree view found for model {model.model}")
+
+            # Add domain to Kanban view
+            kanban_view = IrUiView.search([
+                ('model', '=', model.model),
+                ('type', '=', 'kanban'),
+                ('mode', '=', 'primary')
+            ], limit=1)
+
+            if kanban_view:
+                xml_id_record = IrModelData.search([
+                    ('model', '=', 'ir.ui.view'),
+                    ('res_id', '=', kanban_view.id)
+                ], limit=1)
+                inherit_id_ref = xml_id_record.complete_name if xml_id_record else False
+
+                # Create inherited Kanban view to apply domain
+                IrUiView.create({
+                    'name': 'soft_delete_manager.kanban.view.inherit.dynamic',
+                    'model': model.model,
+                    'type': 'kanban',
+                    'inherit_id': kanban_view.id,
+                    'mode': 'extension',
+                    'arch': """
+                        <xpath expr="//kanban" position="attributes">
+                            <attribute name="default_domain">[('x_is_deleted', '=', False)]</attribute>
+                        </xpath>
+                    """
+                })
+                _logger.info(f"Added domain to Kanban view of model {model.model} (inherit_id: {kanban_view.id}, external ref: {inherit_id_ref})")
+            else:
+                _logger.warning(f"No primary Kanban view found for model {model.model}")
 
             # Create wizard model and views
             wizard_model_name = self._create_dynamic_wizard_model_and_view(model.model)

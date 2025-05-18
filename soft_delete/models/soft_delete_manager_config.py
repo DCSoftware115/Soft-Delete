@@ -79,31 +79,35 @@ class SoftDeleteManagerConfig(models.Model):
         self._apply_action_domain(new_model_ids)
 
     def _apply_action_domain(self, model_ids):
-        """Apply domain to actions to exclude soft-deleted records in tree views."""
+        """Apply domain to actions to exclude soft-deleted records in tree and kanban views."""
         IrModel = self.env['ir.model']
         IrModelData = self.env['ir.model.data']
         IrActionsActWindow = self.env['ir.actions.act_window']
 
         for model in IrModel.browse(model_ids):
-            action = IrActionsActWindow.search([
+            # Search for actions that include tree or kanban in view_mode
+            actions = IrActionsActWindow.search([
                 ('res_model', '=', model.model),
-                ('view_mode', 'in', ['tree,form', 'form,tree'])
-            ], limit=1)
+                '|',  # Use OR to include actions with either tree or kanban
+                ('view_mode', 'in', ['tree,form', 'form,tree', 'kanban,form', 'form,kanban', 'tree,kanban,form', 'kanban,tree,form']),
+                ('view_mode', 'ilike', 'kanban')  # Include any view_mode containing 'kanban'
+            ])
 
-            if action:
+            for action in actions:
+                _logger.debug(f"Processing action {action.name} with view_mode {action.view_mode} for model {model.model}")
                 action.write({
                     'domain': "[('x_is_deleted', '=', False)]"
                 })
                 xml_id_record = IrModelData.search([
-                    ('model', '=', 'ir.actions.act_window'),
+                    ('model', '=', 'ir.model.data'),
                     ('res_id', '=', action.id)
                 ], limit=1)
                 if xml_id_record:
                     _logger.info(f"Updated domain for action {xml_id_record.module}.{xml_id_record.name} of model {model.model}")
                 else:
                     _logger.info(f"Updated domain for action (no XML ID) of model {model.model}")
-            else:
-                _logger.warning(f"No action found for model {model.model}")
+            if not actions:
+                _logger.warning(f"No action found for model {model.model} with tree or kanban view_mode")
 
     def _apply_custom_unlink(self, model_ids):
         """Dynamically patch the unlink method of the given models."""
