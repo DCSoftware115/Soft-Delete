@@ -26,7 +26,7 @@ Usage
 3. Save the settings. The selected models will now have a soft delete feature:
    - Deleting a record will mark it as soft-deleted.
    - A "Recover Deleted" button will appear in the tree view to access deleted records.
-4. Use the wizard to either recover or permanently delete records.
+4. Use the wizard to either recover or permanently delete records
 
 Support
 -------
