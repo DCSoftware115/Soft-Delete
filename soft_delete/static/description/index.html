@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Soft Delete Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Roboto', Arial, sans-serif;
@@ -11,6 +12,7 @@
             line-height: 1.6;
             margin: 0;
             padding: 0;
+            background-color: #f4f4f9;
         }
         h1, h2, h3 {
             color: #4B0082;
@@ -22,6 +24,7 @@
         h2 {
             font-size: 1.8em;
             margin-top: 1.5em;
+            margin-bottom: 0.5em;
         }
         p {
             margin: 0.5em 0;
@@ -31,14 +34,22 @@
             margin: 0 auto;
             padding: 20px;
         }
+        .cover-image {
+            text-align: center;
+            margin-bottom: 20px;
+        }
         .cover-image img {
-            width: 100%;
+            max-width: 100%;
             height: auto;
             border-radius: 8px;
-            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .section {
             margin-bottom: 2em;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         .features ul {
             list-style-type: disc;
@@ -47,17 +58,30 @@
         .features li {
             margin-bottom: 0.5em;
         }
+        .screenshots {
+            display: grid;
+            gap: 20px;
+        }
+        .screenshot-item {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
         .screenshots img {
             width: 100%;
-            max-width: 600px;
+            max-width: 800px;
             height: auto;
+            display: block;
+            margin: 10px auto;
             border: 1px solid #ddd;
             border-radius: 4px;
-            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .support a {
             color: #4B0082;
             text-decoration: none;
+            font-weight: 500;
         }
         .support a:hover {
             text-decoration: underline;
@@ -68,6 +92,21 @@
             border-radius: 4px;
             font-size: 0.9em;
             white-space: pre-wrap;
+            border: 1px solid #ddd;
+        }
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            .container {
+                padding: 15px;
+            }
+            .screenshots img {
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -75,17 +114,17 @@
     <div class="container">
         <!-- Cover Image -->
         <div class="cover-image">
-            <img src="soft_delete_manager_cover.png" alt="Soft Delete Manager Cover Image">
+            <img src="icon.png" alt="Soft Delete Manager Icon">
         </div>
 
         <!-- Overview -->
         <div class="section overview">
             <h1>Soft Delete Manager</h1>
-            <p><strong>Manage soft delete functionality for Odoo models seamlessly.</strong></p>
+            <p><strong>Effortlessly manage soft delete functionality for Odoo models.</strong></p>
             <p>
-                This module enables administrators to configure soft delete functionality for selected Odoo models.
-                Instead of permanently deleting records, they are marked as deleted and can be recovered or permanently
-                removed using a wizard. Perfect for preventing accidental data loss and managing data retention policies.
+                The Soft Delete Manager module allows Odoo administrators to enable soft delete functionality for selected models.
+                Instead of permanently deleting records, they are marked as deleted, allowing recovery or permanent deletion via a wizard.
+                This module is ideal for preventing accidental data loss and maintaining robust data retention policies.
             </p>
         </div>
 
@@ -93,11 +132,11 @@
         <div class="section features">
             <h2>Key Features</h2>
             <ul>
-                <li>Enable soft delete for specific Odoo models via settings.</li>
+                <li>Enable soft delete functionality for specific Odoo models through settings.</li>
                 <li>Add a "Recover Deleted" button to tree views of configured models.</li>
-                <li>Use a wizard to recover or permanently delete soft-deleted records.</li>
+                <li>Use a wizard to view, restore, or permanently delete soft-deleted records.</li>
                 <li>Hide soft-deleted records from default views using domain filters.</li>
-                <li>Securely manage data with the ability to restore records when needed.</li>
+                <li>Secure data management with restore capabilities for accidental deletions.</li>
             </ul>
         </div>
 
@@ -105,33 +144,101 @@
         <div class="section screenshots">
             <h2>Screenshots</h2>
 
-            <!-- Screenshot 1: Settings Page -->
-            <div>
-                <h3>Configure Soft Delete for Models</h3>
-                <p>Select the models for which you want to enable soft delete functionality in the Settings menu.</p>
-                <img src="1model_name_find.png" alt="Soft Delete Manager Settings">
+            <div class="screenshot-item">
+                <h3>Find Model Name</h3>
+                <p>Locate the model name in the Odoo interface to configure soft delete settings.</p>
+                <img src="1model_name_find.png" alt="Find Model Name">
             </div>
 
-            <!-- Screenshot 2: Recover Deleted Button -->
-            <div>
-                <h3>Recover Deleted Button in Tree View</h3>
-                <p>A "Recover Deleted" button appears in the tree view of configured models, allowing you to access deleted records.</p>
-                <img src="2model_name_copy_past.png" alt="Recover Deleted Button">
+            <div class="screenshot-item">
+                <h3>Copy and Paste Model Name</h3>
+                <p>Copy the model name and paste it into the Soft Delete Manager settings to enable soft delete.</p>
+                <img src="2model_name_copy_past.png" alt="Copy and Paste Model Name">
             </div>
 
-            <!-- Screenshot 3: Wizard -->
-            <div>
-                <h3>Wizard to Restore or Delete Records</h3>
-                <p>Use the wizard to view soft-deleted records and either restore them or permanently delete them.</p>
-                <img src="3normal_user_not_access_this_button.png" alt="Soft Delete Wizard">
+            <div class="screenshot-item">
+                <h3>Restricted Access for Normal Users</h3>
+                <p>Normal users cannot access the soft delete functionality, ensuring secure operations.</p>
+                <img src="3normal_user_not_access_this_button.png" alt="Restricted Access for Normal Users">
             </div>
+
+            <div class="screenshot-item">
+                <h3>Switch to Superuser Mode</h3>
+                <p>Administrators can switch to superuser mode to access advanced soft delete features.</p>
+                <img src="4become_superuser.png" alt="Switch to Superuser Mode">
+            </div>
+
+            <div class="screenshot-item">
+                <h3>Deleted Records Tree View</h3>
+                <p>View soft-deleted records in a dedicated tree view for easy management.</p>
+                <img src="5deleted_records_tree_view.png" alt="Deleted Records Tree View">
+            </div>
+
+            <div class="screenshot-item">
+                <h3>Record Deletion</h3>
+                <p>Soft delete a record, marking it as deleted without removing it permanently.</p>
+                <img src="6record_delete.png" alt="Record Deletion">
+            </div>
+
+            <div class="screenshot-item">
+                <h3>View Deleted Records</h3>
+                <p>Soft-deleted records are displayed in a dedicated tree view for review.</p>
+                <img src="7deleted_records_show_in_this_tree_view.png" alt="View Deleted Records">
+            </div>
+
+            <div class="screenshot-item">
+                <h3>Restore and Permanent Delete Buttons</h3>
+                <p>Access buttons to restore or permanently delete soft-deleted records in the wizard.</p>
+                <img src="8restore_and_permanent_delete_buttnes.png" alt="Restore and Permanent Delete Buttons">
+            </div>
+
+            <div class="screenshot-item">
+                <h3>Restore Button</h3>
+                <p>Use the restore button to recover soft-deleted records back to their original state.</p>
+                <img src="9restore_button.png" alt="Restore Button">
+            </div>
+
+            <div class="screenshot-item">
+                <h3>Restored Records in Main Screen</h3>
+                <p>Restored records reappear in the main screen, fully recovered.</p>
+                <img src="10restore_records_in_main_screen.png" alt="Restored Records in Main Screen">
+            </div>
+
+            <div class="screenshot-item">
+                <h3>Permanent Delete Button</h3>
+                <p>Permanently delete soft-deleted records using the dedicated button.</p>
+                <img src="11permanent_delete_button.png" alt="Permanent Delete Button">
+            </div>
+        </div>
+
+        <!-- Installation Instructions -->
+        <div class="section installation">
+            <h2>Installation</h2>
+            <ol>
+                <li>Download or clone this module into your Odoo addons directory.</li>
+                <li>Update the Apps list in Odoo (Apps > Update Apps List).</li>
+                <li>Search for "Soft Delete Manager" and install the module.</li>
+                <li>Configure the models for soft delete under Settings > Soft Delete Manager.</li>
+            </ol>
+        </div>
+
+        <!-- Usage Instructions -->
+        <div class="section usage">
+            <h2>Usage</h2>
+            <ol>
+                <li>Go to <strong>Settings > Soft Delete Manager</strong>.</li>
+                <li>Select the models for which you want to enable soft delete.</li>
+                <li>Save the settings to enable soft delete for selected models.</li>
+                <li>Soft-deleted records can be accessed via the "Recover Deleted" button in the tree view.</li>
+                <li>Use the wizard to restore or permanently delete records.</li>
+            </ol>
         </div>
 
         <!-- Support -->
         <div class="section support">
             <h2>Support</h2>
             <p>
-                If you have any questions or need assistance, feel free to reach out!
+                For questions or assistance, please reach out to the author.
             </p>
             <p>
                 <strong>Email:</strong> <a href="mailto:your-email@example.com">your-email@example.com</a><br>
@@ -143,33 +250,33 @@
         <div class="section license">
             <h2>License</h2>
             <pre>
-Odoo Proprietary License v1.0
+                Odoo Proprietary License v1.0
 
-This software and associated files (the "Software") may only be used (executed,
-modified, executed after modifications) if you have purchased a valid license
-from the authors, typically via Odoo Apps, or if you have received a written
-agreement from the authors of the Software (see the COPYRIGHT file).
+                This software and associated files (the "Software") may only be used (executed,
+                modified, executed after modifications) if you have purchased a valid license
+                from the authors, typically via Odoo Apps, or if you have received a written
+                agreement from the authors of the Software (see the COPYRIGHT file).
 
-You may develop Odoo modules that use the Software as a library (typically
-by depending on it, importing it and using its resources), but without copying
-any source code or material from the Software. You may distribute those
-modules under the license of your choice, provided that this license is
-compatible with the terms of the Odoo Proprietary License (For example:
-LGPL, MIT, or proprietary licenses similar to this one).
+                You may develop Odoo modules that use the Software as a library (typically
+                by depending on it, importing it and using its resources), but without copying
+                any source code or material from the Software. You may distribute those
+                modules under the license of your choice, provided that this license is
+                compatible with the terms of the Odoo Proprietary License (For example:
+                LGPL, MIT, or proprietary licenses similar to this one).
 
-It is forbidden to publish, distribute, sublicense, or sell copies of the Software
-or modified copies of the Software.
+                It is forbidden to publish, distribute, sublicense, or sell copies of the Software
+                or modified copies of the Software.
 
-The above copyright notice and this permission notice must be included in all
-copies or substantial portions of the Software.
+                The above copyright notice and this permission notice must be included in all
+                copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
+                THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+                IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+                FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+                IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+                DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+                ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+                DEALINGS IN THE SOFTWARE.
             </pre>
         </div>
     </div>
