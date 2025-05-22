@@ -1,6 +1,7 @@
-from odoo import models, fields, api, _
+from odoo import models, fields, api, _, SUPERUSER_ID
 import logging
 from lxml import etree
+from odoo.exceptions import AccessError
 
 _logger = logging.getLogger(__name__)
 
@@ -356,3 +357,114 @@ class SoftDeleteConfigSettings(models.TransientModel):
 
         _logger.info(f"Created wizard and views for model: {wizard_model_name}")
         return wizard_model_name
+
+    def action_cleanup_soft_delete(self):
+        """
+        Action to clean up all models, views, and server actions starting with 'x_'.
+        Only accessible by the superuser.
+        """
+        self.ensure_one()
+        if self.env.user.id != SUPERUSER_ID:
+            raise AccessError(_("This action is restricted to the superuser only."))
+        
+        try:
+            # Begin transaction
+            self.env.cr.execute("BEGIN;")
+
+            # Step 1: Remove models starting with 'x_'
+            _logger.info("Starting cleanup of models starting with 'x_'")
+            model_ids = self.env['ir.model'].search([('model', '=like', 'x_%')]).ids
+            if model_ids:
+                models = self.env['ir.model'].browse(model_ids)
+                model_names = [model.model for model in models]
+                _logger.info(f"Found {len(model_names)} models to delete: {model_names}")
+
+                # Force delete ir.model.data entries, including noupdate=1
+                model_data = self.env['ir.model.data'].search([('model', '=', 'ir.model'), ('res_id', 'in', model_ids)])
+                if model_data:
+                    model_data.with_context(_force_unlink=True).unlink()
+                    _logger.info(f"Force deleted {len(model_data)} ir.model.data entries for models")
+
+                # Remove related fields
+                fields = self.env['ir.model.fields'].search([('model_id', 'in', model_ids)])
+                if fields:
+                    fields.with_context(_force_unlink=True).unlink()
+                    _logger.info(f"Deleted {len(fields)} fields for models")
+
+                # Drop database tables for these models
+                for model_name in model_names:
+                    table_name = model_name.replace('.', '_')
+                    try:
+                        self.env.cr.execute(f"DROP TABLE IF EXISTS {table_name} CASCADE;")
+                        _logger.info(f"Dropped table {table_name}")
+                    except Exception as e:
+                        _logger.warning(f"Failed to drop table {table_name}: {str(e)}")
+
+                # Delete the models
+                models.with_context(_force_unlink=True).unlink()
+                _logger.info(f"Deleted {len(model_ids)} models starting with 'x_'")
+
+            # Step 2: Remove views associated with models starting with 'x_'
+            _logger.info("Starting cleanup of views for models starting with 'x_'")
+            view_ids = self.env['ir.ui.view'].search([('model', '=like', 'x_%')]).ids
+            if view_ids:
+                views = self.env['ir.ui.view'].browse(view_ids)
+                _logger.info(f"Found {len(view_ids)} views to delete for models starting with 'x_'")
+                
+                # Force delete ir.model.data entries for views
+                view_data = self.env['ir.model.data'].search([('model', '=', 'ir.ui.view'), ('res_id', 'in', view_ids)])
+                if view_data:
+                    view_data.with_context(_force_unlink=True).unlink()
+                    _logger.info(f"Force deleted {len(view_data)} ir.model.data entries for views")
+                
+                # Delete the views
+                views.with_context(_force_unlink=True).unlink()
+                _logger.info(f"Deleted {len(view_ids)} views for models starting with 'x_'")
+
+            # Step 3: Remove server actions related to models starting with 'x_'
+            _logger.info("Starting cleanup of server actions for models starting with 'x_'")
+            action_ids = self.env['ir.actions.server'].search([('model_id.model', '=like', 'x_%')]).ids
+            if action_ids:
+                actions = self.env['ir.actions.server'].browse(action_ids)
+                _logger.info(f"Found {len(action_ids)} server actions to delete for models starting with 'x_'")
+                
+                # Force delete ir.model.data entries for actions
+                action_data = self.env['ir.model.data'].search([('model', '=', 'ir.actions.server'), ('res_id', 'in', action_ids)])
+                if action_data:
+                    action_data.with_context(_force_unlink=True).unlink()
+                    _logger.info(f"Force deleted {len(action_data)} ir.model.data entries for server actions")
+                
+                # Delete the actions
+                actions.with_context(_force_unlink=True).unlink()
+                _logger.info(f"Deleted {len(action_ids)} server actions for models starting with 'x_'")
+
+            # Step 4: Clean up soft delete configuration
+            _logger.info("Cleaning up soft delete configuration")
+            config = self.env['soft.delete.manager.config'].search([], limit=1)
+            if config:
+                config_data = self.env['ir.model.data'].search([('model', '=', 'soft.delete.manager.config'), ('res_id', '=', config.id)])
+                if config_data:
+                    config_data.with_context(_force_unlink=True).unlink()
+                    _logger.info(f"Force deleted ir.model.data entries for soft.delete.manager.config")
+                config.unlink()
+                _logger.info("Deleted soft.delete.manager.config record")
+
+            # Commit the transaction
+            self.env.cr.execute("COMMIT;")
+            _logger.info("Cleanup action completed successfully")
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Success'),
+                    'message': _('All models, views, and server actions starting with "x_" have been deleted.'),
+                    'type': 'success',
+                    'sticky': False,
+                }
+            }
+
+        except Exception as e:
+            # Rollback on error
+            self.env.cr.execute("ROLLBACK;")
+            _logger.error(f"Error during cleanup action: {str(e)}")
+            raise
