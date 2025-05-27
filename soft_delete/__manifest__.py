@@ -18,6 +18,7 @@
     'data': [
         'security/ir.model.access.csv',
         'views/soft_delete_config_settings_views.xml',
+        'views/base_module_uninstall_views_inherit.xml',
     ],
     'assets': {
         'web.assets_backend': [
