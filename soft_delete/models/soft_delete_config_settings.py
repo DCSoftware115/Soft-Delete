@@ -32,7 +32,7 @@ class SoftDeleteConfigSettings(models.TransientModel):
 
         self.config_id.write({'model_ids': [(6, 0, new_model_ids)]})
         self._apply_soft_delete(new_model_ids, previous_model_ids)
-        self.env.cr.commit()
+        # self.env.cr.commit()
 
         IrModel = self.env['ir.model']
         IrUiView = self.env['ir.ui.view']
@@ -365,13 +365,13 @@ class SoftDeleteConfigSettings(models.TransientModel):
         the 'x_is_deleted' domain, and clears domains from actions.
         Only accessible by the superuser.
         """
-        self.ensure_one()
+        # self.ensure_one()
         if self.env.user.id != SUPERUSER_ID:
             raise AccessError(_("This action is restricted to the superuser only."))
         
         try:
             # Begin transaction
-            self.env.cr.execute("BEGIN;")
+            # self.env.cr.execute("BEGIN;")
 
             # Step 1: Remove 'x_is_deleted' field from all models
             _logger.info("Starting cleanup of 'x_is_deleted' fields from all models")
@@ -506,7 +506,7 @@ class SoftDeleteConfigSettings(models.TransientModel):
                 _logger.info("Deleted soft.delete.manager.config record")
 
             # Commit the transaction
-            self.env.cr.execute("COMMIT;")
+            # self.env.cr.execute("COMMIT;")
             _logger.info("Cleanup action completed successfully")
             return {
                 'type': 'ir.actions.client',
@@ -521,6 +521,6 @@ class SoftDeleteConfigSettings(models.TransientModel):
 
         except Exception as e:
             # Rollback on error
-            self.env.cr.execute("ROLLBACK;")
+            # self.env.cr.execute("ROLLBACK;")
             _logger.error(f"Error during cleanup action: {str(e)}")
             raise
