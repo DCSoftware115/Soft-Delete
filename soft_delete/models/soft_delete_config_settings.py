@@ -42,14 +42,14 @@ class SoftDeleteConfigSettings(models.TransientModel):
         # Remove outdated inherited tree views
         existing_tree_views = IrUiView.search([
             ('inherit_id.model', 'in', [m.model for m in IrModel.search([])]),
-            ('name', '=', 'soft_delete_manager.tree.view.inherit.dynamic')
+            ('name', '=', 'x_soft_delete_manager.tree.view.inherit.dynamic')
         ])
         existing_tree_views.unlink()
 
         # Remove outdated inherited Kanban views
         existing_kanban_views = IrUiView.search([
             ('inherit_id.model', 'in', [m.model for m in IrModel.search([])]),
-            ('name', '=', 'soft_delete_manager.kanban.view.inherit.dynamic')
+            ('name', '=', 'x_soft_delete_manager.kanban.view.inherit.dynamic')
         ])
         existing_kanban_views.unlink()
 
@@ -87,7 +87,7 @@ class SoftDeleteConfigSettings(models.TransientModel):
                         new_js_class = "soft_delete_manager_list_view_with_button"
 
                 IrUiView.create({
-                    'name': 'soft_delete_manager.tree.view.inherit.dynamic',
+                    'name': 'x_soft_delete_manager.tree.view.inherit.dynamic',
                     'model': model.model,
                     'type': 'tree',
                     'inherit_id': tree_view.id,
@@ -118,7 +118,7 @@ class SoftDeleteConfigSettings(models.TransientModel):
 
                 # Create inherited Kanban view to apply domain
                 IrUiView.create({
-                    'name': 'soft_delete_manager.kanban.view.inherit.dynamic',
+                    'name': 'x_soft_delete_manager.kanban.view.inherit.dynamic',
                     'model': model.model,
                     'type': 'kanban',
                     'inherit_id': kanban_view.id,
@@ -361,6 +361,8 @@ class SoftDeleteConfigSettings(models.TransientModel):
     def action_cleanup_soft_delete(self):
         """
         Action to clean up all models, views, and server actions starting with 'x_'.
+        Removes the 'x_is_deleted' field from all models, inherited views containing
+        the 'x_is_deleted' domain, and clears domains from actions.
         Only accessible by the superuser.
         """
         self.ensure_one()
@@ -371,7 +373,59 @@ class SoftDeleteConfigSettings(models.TransientModel):
             # Begin transaction
             self.env.cr.execute("BEGIN;")
 
-            # Step 1: Remove models starting with 'x_'
+            # Step 1: Remove 'x_is_deleted' field from all models
+            _logger.info("Starting cleanup of 'x_is_deleted' fields from all models")
+            x_is_deleted_fields = self.env['ir.model.fields'].search([('name', '=', 'x_is_deleted')])
+            if x_is_deleted_fields:
+                model_names = [field.model for field in x_is_deleted_fields]
+                _logger.info(f"Found {len(x_is_deleted_fields)} 'x_is_deleted' fields in models: {model_names}")
+                x_is_deleted_fields.with_context(_force_unlink=True).unlink()
+                _logger.info(f"Deleted {len(x_is_deleted_fields)} 'x_is_deleted' fields")
+            else:
+                _logger.info("No 'x_is_deleted' fields found in any models")
+
+            # Step 2: Remove inherited views containing 'x_is_deleted' domain
+            _logger.info("Starting cleanup of inherited views with 'x_is_deleted' domain")
+            inherited_views = self.env['ir.ui.view'].search([
+                ('name', 'in', [
+                    'x_soft_delete_manager.tree.view.inherit.dynamic',
+                    'x_soft_delete_manager.kanban.view.inherit.dynamic'
+                ])
+            ])
+            if inherited_views:
+                view_data = self.env['ir.model.data'].search([
+                    ('model', '=', 'ir.ui.view'),
+                    ('res_id', 'in', inherited_views.ids)
+                ])
+                if view_data:
+                    view_data.with_context(_force_unlink=True).unlink()
+                    _logger.info(f"Force deleted {len(view_data)} ir.model.data entries for inherited views")
+                inherited_views.with_context(_force_unlink=True).unlink()
+                _logger.info(f"Deleted {len(inherited_views)} inherited views with 'x_is_deleted' domain")
+            else:
+                _logger.info("No inherited views found with 'x_is_deleted' domain")
+
+            # Step 3: Clear domains from ir.actions.act_window
+            _logger.info("Starting cleanup of domains from ir.actions.act_window")
+            actions = self.env['ir.actions.act_window'].search([
+                ('domain', '=', "[('x_is_deleted', '=', False)]"),
+                ('view_mode', 'in', ['tree,form', 'form,tree'])
+            ])
+            if actions:
+                for action in actions:
+                    action.write({'domain': False})
+                    xml_id_record = self.env['ir.model.data'].search([
+                        ('model', '=', 'ir.actions.act_window'),
+                        ('res_id', '=', action.id)
+                    ], limit=1)
+                    if xml_id_record:
+                        _logger.info(f"Cleared domain for action {xml_id_record.module}.{xml_id_record.name}")
+                    else:
+                        _logger.info(f"Cleared domain for action (no XML ID) with ID {action.id}")
+            else:
+                _logger.info("No actions found with x_is_deleted domain")
+
+            # Step 4: Remove models starting with 'x_'
             _logger.info("Starting cleanup of models starting with 'x_'")
             model_ids = self.env['ir.model'].search([('model', '=like', 'x_%')]).ids
             if model_ids:
@@ -385,8 +439,8 @@ class SoftDeleteConfigSettings(models.TransientModel):
                     model_data.with_context(_force_unlink=True).unlink()
                     _logger.info(f"Force deleted {len(model_data)} ir.model.data entries for models")
 
-                # Remove related fields
-                fields = self.env['ir.model.fields'].search([('model_id', 'in', model_ids)])
+                # Remove related fields (excluding x_is_deleted, already handled)
+                fields = self.env['ir.model.fields'].search([('model_id', 'in', model_ids), ('name', '!=', 'x_is_deleted')])
                 if fields:
                     fields.with_context(_force_unlink=True).unlink()
                     _logger.info(f"Deleted {len(fields)} fields for models")
@@ -404,7 +458,7 @@ class SoftDeleteConfigSettings(models.TransientModel):
                 models.with_context(_force_unlink=True).unlink()
                 _logger.info(f"Deleted {len(model_ids)} models starting with 'x_'")
 
-            # Step 2: Remove views associated with models starting with 'x_'
+            # Step 5: Remove views associated with models starting with 'x_'
             _logger.info("Starting cleanup of views for models starting with 'x_'")
             view_ids = self.env['ir.ui.view'].search([('model', '=like', 'x_%')]).ids
             if view_ids:
@@ -420,8 +474,10 @@ class SoftDeleteConfigSettings(models.TransientModel):
                 # Delete the views
                 views.with_context(_force_unlink=True).unlink()
                 _logger.info(f"Deleted {len(view_ids)} views for models starting with 'x_'")
+            else:
+                _logger.info("No views found for models starting with 'x_'")
 
-            # Step 3: Remove server actions related to models starting with 'x_'
+            # Step 6: Remove server actions related to models starting with 'x_'
             _logger.info("Starting cleanup of server actions for models starting with 'x_'")
             action_ids = self.env['ir.actions.server'].search([('model_id.model', '=like', 'x_%')]).ids
             if action_ids:
@@ -438,7 +494,7 @@ class SoftDeleteConfigSettings(models.TransientModel):
                 actions.with_context(_force_unlink=True).unlink()
                 _logger.info(f"Deleted {len(action_ids)} server actions for models starting with 'x_'")
 
-            # Step 4: Clean up soft delete configuration
+            # Step 7: Clean up soft delete configuration
             _logger.info("Cleaning up soft delete configuration")
             config = self.env['soft.delete.manager.config'].search([], limit=1)
             if config:
@@ -457,7 +513,7 @@ class SoftDeleteConfigSettings(models.TransientModel):
                 'tag': 'display_notification',
                 'params': {
                     'title': _('Success'),
-                    'message': _('All models, views, and server actions starting with "x_" have been deleted.'),
+                    'message': _('All models, views, server actions starting with "x_", the "x_is_deleted" field, and related domains have been deleted.'),
                     'type': 'success',
                     'sticky': False,
                 }
