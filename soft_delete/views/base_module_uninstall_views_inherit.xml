@@ -6,20 +6,33 @@
             <field name="model">base.module.uninstall</field>
             <field name="inherit_id" ref="base.view_base_module_uninstall"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='model_ids']" position="replace">
-                    <field name="is_soft_delete_module" invisible="1"/>
-                    <field name="model_ids" string="Models" nolabel="1" attrs="{'invisible': [('is_soft_delete_module', '=', True)]}">
-                        <tree string="Models">
-                            <field name="name" string="Name"/>
-                            <field name="count"/>
-                        </tree>
-                    </field>
-                    <field name="model_ids" string="Wizard Models" nolabel="1" attrs="{'invisible': [('is_soft_delete_module', '=', False)]}">
-                        <tree string="Wizard Models" create="false" edit="false" delete="false">
-                            <field name="name" string="Model Name"/>
-                            <field name="count" string="Records"/>
-                        </tree>
-                    </field>
+                <xpath expr="//div[@class='d-flex bd-highlight']" position="replace">
+                    <div class="d-flex bd-highlight">
+                        <div class="me-auto p-2 bd-highlight">
+                            <h3>Apps to Uninstall</h3>
+                        </div>
+                        <div class="p-2 bd-highlight" attrs="{'invisible': [('is_soft_delete_module', '=', True)]}">
+                            <field name="show_all"/>
+                                Show All
+                        </div>
+                        <div class="p-2 bd-highlight" attrs="{'invisible': [('is_soft_delete_module', '=', False)]}">
+                            <field name="select_all_permanent_delete" class="text-danger" readonly="1"/>
+                            <label for="select_all_permanent_delete" class="text-danger">
+                                    Select All Models for Deleted Records Permanently Delete
+                            </label>
+                        </div>
+                    </div>
+                </xpath>
+                <xpath expr="//div[@class='d-flex bd-highlight']" position="after">
+                    <div>
+                        <field name="is_soft_delete_module" invisible="1"/>
+                        <p class="text-danger">
+                            If this is not selected, models' records will be permanently deleted.
+                        </p>
+                        <group>
+                            <field name="specific_models_recover" domain="[('id', 'in', model_ids)]" widget="many2many_tags" options="{'no_create': True}"/>
+                        </group>
+                    </div>
                 </xpath>
             </field>
         </record>
