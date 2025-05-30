@@ -114,9 +114,10 @@ class BaseModuleUninstall(models.TransientModel):
         """
         Override the uninstall action to handle soft delete logic for the soft_delete module.
         - Transform model names of the form 'x_<name>_wizard' to '<name>' (e.g., 'x_cargo_short_name_master_wizard' to 'cargo.short.name.master').
-        - If select_all_permanent_delete is True, permanently delete records.
-        - If specific_models_recover is set, soft delete by setting x_is_deleted = True for all selected models.
-        - For non-selected models, permanently delete records where x_is_deleted = True.
+        - If select_all_permanent_delete is True, permanently delete all records.
+        - If specific_models_recover is set:
+            - For selected models, recover records by setting x_is_deleted = False where x_is_deleted = True.
+        - For non-selected models, permanently delete records where x_is_deleted = True (no recovery).
         """
         if self.is_soft_delete_module:
             # Validate the state before proceeding
@@ -139,7 +140,7 @@ class BaseModuleUninstall(models.TransientModel):
                         if model_name in self.env:
                             self.env[model_name].search([]).unlink()  # Permanent deletion
             elif self.specific_models_recover:
-                # Handle records for recovery (soft delete) and non-selected models
+                # Handle records for recovery and non-selected models
                 for model in self.model_ids:
                     model_name = model.model
                     # Transform the model name directly
@@ -154,13 +155,13 @@ class BaseModuleUninstall(models.TransientModel):
                                 continue  # Skip this model
 
                             if model in self.specific_models_recover:
-                                # Soft delete by setting x_is_deleted = True for all selected models
-                                self.env[transformed_model].search([('x_is_deleted', '=', False)]).write({'x_is_deleted': True})
+                                # Recover records for selected models by setting x_is_deleted = False where x_is_deleted = True
+                                self.env[transformed_model].search([('x_is_deleted', '=', True)]).write({'x_is_deleted': False})
                             else:
-                                # For non-selected models, permanently delete records where x_is_deleted = True
+                                # For non-selected models, permanently delete records where x_is_deleted = True (no recovery)
                                 records_to_delete = self.env[transformed_model].search([('x_is_deleted', '=', True)])
                                 if records_to_delete:
-                                    records_to_delete.unlink()  # Permanently delete
+                                    records_to_delete.unlink()  # Permanently delete from the database
                     else:
                         if model_name in self.env:
                             # Check if the model has an 'x_is_deleted' field
@@ -171,13 +172,13 @@ class BaseModuleUninstall(models.TransientModel):
                                 continue  # Skip this model
 
                             if model in self.specific_models_recover:
-                                # Soft delete by setting x_is_deleted = True for all selected models
-                                self.env[model_name].search([('x_is_deleted', '=', False)]).write({'x_is_deleted': True})
+                                # Recover records for selected models by setting x_is_deleted = False where x_is_deleted = True
+                                self.env[model_name].search([('x_is_deleted', '=', True)]).write({'x_is_deleted': False})
                             else:
-                                # For non-selected models, permanently delete records where x_is_deleted = True
+                                # For non-selected models, permanently delete records where x_is_deleted = True (no recovery)
                                 records_to_delete = self.env[model_name].search([('x_is_deleted', '=', True)])
                                 if records_to_delete:
-                                    records_to_delete.unlink()  # Permanently delete
+                                    records_to_delete.unlink()  # Permanently delete from the database
             else:
                 raise UserError("Please select models to recover or choose to permanently delete all records.")
 
