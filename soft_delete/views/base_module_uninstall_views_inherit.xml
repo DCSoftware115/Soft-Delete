@@ -13,12 +13,12 @@
                         </div>
                         <div class="p-2 bd-highlight" attrs="{'invisible': [('is_soft_delete_module', '=', True)]}">
                             <field name="show_all"/>
-                                Show All
+                            Show All
                         </div>
                         <div class="p-2 bd-highlight" attrs="{'invisible': [('is_soft_delete_module', '=', False)]}">
-                            <field name="select_all_permanent_delete" class="text-danger" readonly="1"/>
+                            <field name="select_all_permanent_delete" class="text-danger"/>
                             <label for="select_all_permanent_delete" class="text-danger">
-                                    Select All Models for Deleted Records Permanently Delete
+                                Select All Models for Deleted Records Permanently Delete
                             </label>
                         </div>
                     </div>
