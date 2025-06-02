@@ -15,22 +15,22 @@
                             <field name="show_all"/>
                             Show All
                         </div>
-                        <div class="p-2 bd-highlight" attrs="{'invisible': [('is_soft_delete_module', '=', False)]}">
-                            <field name="select_all_permanent_delete" class="text-danger"/>
-                            <label for="select_all_permanent_delete" class="text-danger">
+                        <!-- <div class="p-2 bd-highlight" attrs="{'invisible': [('is_soft_delete_module', '=', False)]}">
+                            <field name="select_all_permanent_delete" class="text-danger" readonly="1"/>
+                            <label for="select_all_permanent_delete" class="text-danger" readonly="1">
                                 Select All Models for Deleted Records Permanently Delete
                             </label>
-                        </div>
+                        </div> -->
                     </div>
                 </xpath>
                 <xpath expr="//div[@class='d-flex bd-highlight']" position="after">
-                    <div>
+                    <div attrs="{'invisible': [('is_soft_delete_module', '=', False)]}">
                         <field name="is_soft_delete_module" invisible="1"/>
                         <p class="text-danger">
                             If this is not selected, models' records will be permanently deleted.
                         </p>
                         <group>
-                            <field name="specific_models_recover" domain="[('id', 'in', model_ids)]" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="specific_models_recover" domain="[('id', 'in', model_ids)]" widget="many2many_tags" options="{'no_create': True}" readonly="1"/>
                         </group>
                     </div>
                 </xpath>

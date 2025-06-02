@@ -23,6 +23,17 @@ class SoftDeleteConfigSettings(models.TransientModel):
         default=None
     )
 
+    select_all_permanent_delete = fields.Boolean(
+        string='Select All Models for Deleted Records Permanently Delete',
+        default=True
+    )
+
+    specific_models_recover = fields.Many2many(
+        'ir.model',
+        string='Select Specific Model for Records Recover',
+        relation='soft_delete_specific_models_rel',
+    )
+
     def set_values(self):
         super().set_values()
         self.ensure_one()
@@ -32,21 +43,23 @@ class SoftDeleteConfigSettings(models.TransientModel):
 
         self.config_id.write({'model_ids': [(6, 0, new_model_ids)]})
         self._apply_soft_delete(new_model_ids, previous_model_ids)
-        # self.env.cr.commit()
+
+        ICPSudo = self.env['ir.config_parameter'].sudo()
+        ICPSudo.set_param('soft_delete.select_all_permanent_delete', self.select_all_permanent_delete)
+        ICPSudo.set_param('soft_delete.specific_models_recover', ','.join(map(str, self.specific_models_recover.ids)))
 
         IrModel = self.env['ir.model']
         IrUiView = self.env['ir.ui.view']
         IrModelData = self.env['ir.model.data']
         IrActionsServer = self.env['ir.actions.server']
 
-        # Remove outdated inherited tree views
+        # Remove outdated inherited views
         existing_tree_views = IrUiView.search([
             ('inherit_id.model', 'in', [m.model for m in IrModel.search([])]),
             ('name', '=', 'x_soft_delete_manager.tree.view.inherit.dynamic')
         ])
         existing_tree_views.unlink()
 
-        # Remove outdated inherited Kanban views
         existing_kanban_views = IrUiView.search([
             ('inherit_id.model', 'in', [m.model for m in IrModel.search([])]),
             ('name', '=', 'x_soft_delete_manager.kanban.view.inherit.dynamic')
@@ -55,7 +68,6 @@ class SoftDeleteConfigSettings(models.TransientModel):
 
         # Process each model
         for model in IrModel.browse(new_model_ids):
-            # Add js_class to tree view
             tree_view = IrUiView.search([
                 ('model', '=', model.model),
                 ('type', '=', 'tree'),
@@ -69,7 +81,6 @@ class SoftDeleteConfigSettings(models.TransientModel):
                 ], limit=1)
                 inherit_id_ref = xml_id_record.complete_name if xml_id_record else False
 
-                # Parse the arch_db string into an XML tree
                 try:
                     parser = etree.XMLParser(remove_blank_text=True)
                     tree = etree.fromstring(tree_view.arch_db, parser=parser)
@@ -102,7 +113,6 @@ class SoftDeleteConfigSettings(models.TransientModel):
             else:
                 _logger.warning(f"No primary tree view found for model {model.model}")
 
-            # Add domain to Kanban view
             kanban_view = IrUiView.search([
                 ('model', '=', model.model),
                 ('type', '=', 'kanban'),
@@ -116,7 +126,6 @@ class SoftDeleteConfigSettings(models.TransientModel):
                 ], limit=1)
                 inherit_id_ref = xml_id_record.complete_name if xml_id_record else False
 
-                # Create inherited Kanban view to apply domain
                 IrUiView.create({
                     'name': 'x_soft_delete_manager.kanban.view.inherit.dynamic',
                     'model': model.model,
@@ -133,10 +142,7 @@ class SoftDeleteConfigSettings(models.TransientModel):
             else:
                 _logger.warning(f"No primary Kanban view found for model {model.model}")
 
-            # Create wizard model and views
             wizard_model_name = self._create_dynamic_wizard_model_and_view(model.model)
-
-            # Ensure server action exists
             self._ensure_server_action(model, wizard_model_name)
 
         self._apply_domain_to_actions(new_model_ids)
@@ -213,8 +219,17 @@ class SoftDeleteConfigSettings(models.TransientModel):
         res = super(SoftDeleteConfigSettings, self).get_values()
         config = self._get_or_create_config()
         self.ensure_all_server_actions()
-        res['config_id'] = config.id
-        res['model_ids'] = [(6, 0, config.model_ids.ids)]
+
+        ICPSudo = self.env['ir.config_parameter'].sudo()
+        ids_str = ICPSudo.get_param('soft_delete.specific_models_recover', default='')
+        model_ids = [int(id) for id in ids_str.split(',') if id]
+
+        res.update({
+            'config_id': config.id,
+            'model_ids': [(6, 0, config.model_ids.ids)],
+            'select_all_permanent_delete': ICPSudo.get_param('soft_delete.select_all_permanent_delete', default='True') == 'True',
+            'specific_models_recover': [(6, 0, model_ids)],
+        })
         return res
 
     @api.model
@@ -524,3 +539,10 @@ class SoftDeleteConfigSettings(models.TransientModel):
             # self.env.cr.execute("ROLLBACK;")
             _logger.error(f"Error during cleanup action: {str(e)}")
             raise
+
+    @api.onchange('specific_models_recover')
+    def _onchange_specific_models_recover(self):
+        if self.specific_models_recover:
+            self.select_all_permanent_delete = False
+        else:
+            self.select_all_permanent_delete = True
