@@ -3,3 +3,5 @@ access_soft_delete_manager_config_admin,access.soft.delete.manager.config.admin,
 access_soft_delete_manager_config_user,access.soft.delete.manager.config.user,model_soft_delete_manager_config,base.group_user,1,0,0,0
 access_soft_delete_mixin_admin,access.soft.delete.mixin.admin,model_soft_delete_mixin,base.group_system,1,1,1,1
 access_soft_delete_mixin_user,access.soft.delete.mixin.user,model_soft_delete_mixin,base.group_user,1,0,0,0
+access_soft_delete_manager_all_modules_admin,access.soft.delete.manager.all.modules.admin,model_soft_delete_manager_all_modules,base.group_system,1,1,1,1
+access_soft_delete_manager_all_modules_user,access.soft.delete.manager.all.modules.user,model_soft_delete_manager_all_modules,base.group_user,1,0,0,0

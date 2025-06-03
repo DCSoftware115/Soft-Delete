@@ -442,7 +442,7 @@ class SoftDeleteConfigSettings(models.TransientModel):
 
             # Step 4: Remove models starting with 'x_'
             _logger.info("Starting cleanup of models starting with 'x_'")
-            model_ids = self.env['ir.model'].search([('model', '=like', 'x_%')]).ids
+            model_ids = self.env['ir.model'].search([('model', '=like', 'x_%'), ('model', '!=', 'soft.delete.manager.all.modules')]).ids
             if model_ids:
                 models = self.env['ir.model'].browse(model_ids)
                 model_names = [model.model for model in models]
