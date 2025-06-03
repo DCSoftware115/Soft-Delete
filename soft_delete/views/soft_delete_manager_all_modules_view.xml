@@ -8,8 +8,9 @@
         <field name="name">soft.delete.manager.all.modules.tree</field>
         <field name="model">soft.delete.manager.all.modules</field>
         <field name="arch" type="xml">
-            <tree string="Soft Delete Manager All Modules">
-                <field name="model_id"/>
+            <tree string="Soft Delete Manager All Modules" create="false" edit="false">
+                <field name="model_id" invisible="1"/>
+                <field name="model_display_name"/>
                 <field name="model_count"/>
             </tree>
         </field>
@@ -20,7 +21,7 @@
         <field name="name">soft.delete.manager.all.modules.kanban</field>
         <field name="model">soft.delete.manager.all.modules</field>
         <field name="arch" type="xml">
-            <kanban string="Soft Delete Manager All Modules">
+            <kanban string="Soft Delete Manager All Modules" create="false" edit="false">
                 <field name="model_id"/>
                 <field name="model_count"/>
                 <templates>
@@ -28,7 +29,7 @@
                         <div class="oe_kanban_global_click">
                             <div class="oe_kanban_details">
                                 <strong>
-                                    <field name="model_id" display_field="display_name"/>
+                                    <field name="model_display_name" display_field="model_display_name"/>
                                 </strong>
                                 <br/>
                                 <span>Records: <field name="model_count"/>
@@ -59,8 +60,8 @@
         <field name="res_model">soft.delete.manager.all.modules</field>
         <field name="view_mode">tree,kanban,pivot</field>
         <field name="view_id" ref="view_soft_delete_manager_all_modules_tree"/>
-        <!-- <field name="domain">[('model_count', '&gt;', 0)]</field> -->
-        <field name="domain">[]</field>
+        <field name="domain">[('model_count', '>', 0)]</field>
+        <!-- <field name="domain">[]</field> -->
     </record>
 
     <!-- Menu Item -->

@@ -60,12 +60,16 @@ class SoftDeleteManagerAllModules(models.Model):
 
     def _compute_model_display_name(self):
         for record in self:
-            if record.model_id and record.model_id.name:
-                base_name = record.model_id.name
-                record.model_display_name = (
-                    base_name[:-6] + "Recover Deleted Records"
-                    if base_name.endswith('Wizard') else base_name
-                )
+            if record.model_id and record.model_id.model:  # Use model_id.model instead of model_id.name
+                base_name = record.model_id.model  # e.g., 'x_cargo_short_name_master_wizard'
+                # Remove 'x_' prefix and '_wizard' suffix, then replace '_' with ' '
+                cleaned_name = base_name
+                if base_name.startswith('x_'):
+                    cleaned_name = cleaned_name[2:]  # Remove 'x_'
+                if cleaned_name.endswith('_wizard'):
+                    cleaned_name = cleaned_name[:-7]  # Remove '_wizard'
+                display_name = cleaned_name.replace('_', ' ')  # Replace '_' with ' '
+                record.model_display_name = display_name.title()  # Optional: Capitalize words
             else:
                 record.model_display_name = False
 
